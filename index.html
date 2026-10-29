@@ -1,0 +1,973 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#10385d" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Reporte Pro" />
+  <meta name="description" content="Crea, descarga y comparte reportes de jornada desde cualquier dispositivo." />
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="icon" href="icons/icon.svg" type="image/svg+xml" />
+  <link rel="apple-touch-icon" sizes="180x180" href="icons/icon-180.png" />
+  <link rel="stylesheet" href="./app.css" />
+  <title>Reporte de Jornada Pro</title>
+  
+  <script src="./report-renderer.js"></script>
+  
+  <style>
+    body { 
+      background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
+      font-family: system-ui, -apple-system, sans-serif; 
+      color: #f8fafc;
+    }
+    input, select, textarea { font-size: 16px !important; }
+    
+    .card-3d {
+      background: rgba(255, 255, 255, 0.03);
+      backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5), inset 0 1px 0 0 rgba(255, 255, 255, 0.1);
+    }
+    .input-3d {
+      background: rgba(15, 23, 42, 0.6);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: #ffffff;
+    }
+    .input-3d:focus {
+      border-color: #818cf8;
+      box-shadow: 0 0 15px rgba(129, 140, 248, 0.3);
+    }
+    :root { color-scheme: light; }
+    body { max-width: 1100px !important; padding: 24px !important; background: #f1f6fb !important; color: #123052 !important; font-family: Inter, ui-sans-serif, system-ui, -apple-system, sans-serif !important; }
+    body > div > header { background: #10385d !important; border: 0 !important; border-radius: 18px !important; padding: 18px 22px !important; box-shadow: 0 12px 28px rgba(16,56,93,.14) !important; }
+    body > div > header > div > div:first-child { background: linear-gradient(145deg,#21c5d4,#168bc1) !important; border-radius: 13px !important; width: 48px; height: 48px; display:flex; align-items:center; justify-content:center; font-weight:900; }
+    body > div > header h1 { font-size: 17px !important; letter-spacing: .1em !important; }
+    body > div > header > div > div:first-child { font-size:14px !important; letter-spacing:-.6px; box-shadow:0 6px 16px #061d3438 !important; }
+    #mainForm > div:nth-child(5) { padding-top:4px; }
+    #stepForm h2, #stepPreview h2 { color:#175b7e !important; }
+    #openConfigBtn:hover { background:#ffffff28 !important; }
+    #reportCard .report-header { background-image:radial-gradient(circle at 92% 8%,#2d8da055 0,transparent 34%),linear-gradient(115deg,#0d3459 0%,#164c78 65%,#087e9c 100%) !important; }
+    #reportCard .report-test-card { box-shadow:0 3px 10px rgba(20,55,83,.035); }
+    #reportCard #cardObsContainer { background:linear-gradient(130deg,#fbfdff,#f6fafc) !important; }
+    #reportCard #cardEmpresa { max-width:360px; overflow-wrap:anywhere; }
+    #reportCard #cardNombre { overflow-wrap:anywhere; }
+    body > div > header p { color:#a7ddea !important; font-size:11px !important; letter-spacing:.04em; }
+    #openConfigBtn { background:#ffffff18 !important; border:1px solid #ffffff35 !important; border-radius:11px !important; color:#e7f8ff !important; padding:10px 14px !important; }
+    .card-3d { background:#fff !important; backdrop-filter:none !important; border:1px solid #dce7f1 !important; box-shadow:0 14px 36px rgba(27,63,97,.08) !important; border-radius:20px !important; }
+    #stepForm, #stepPreview { max-width:900px; width:100%; margin-left:auto; margin-right:auto; padding:28px !important; }
+    body > div > header { max-width:900px; width:100%; margin:0 auto 16px !important; position:relative; overflow:hidden; }
+    body > div > header:after { content:""; position:absolute; inset:auto 0 0 0; height:3px; background:linear-gradient(90deg,#24c5d3 0%,#35d1c1 42%,transparent 78%); }
+    body:before { content:""; position:fixed; width:420px; height:420px; right:-230px; top:18vh; border-radius:50%; background:#bfeaf1; filter:blur(90px); opacity:.35; pointer-events:none; z-index:-1; }
+    #stepForm, #stepPreview { position:relative; }
+    #stepForm h2, #stepPreview h2 { display:flex; align-items:center; gap:10px; }
+    #stepForm h2 > span, #stepPreview h2 > span { width:27px !important; height:27px !important; border-radius:50% !important; background:#e3f4f8 !important; color:#157695 !important; border:1px solid #c9e8ef !important; font-size:11px !important; }
+    #stepForm label { letter-spacing:.01em; }
+    #mainForm input, #mainForm select, #mainForm textarea, #newTestInput { transition:border-color .18s ease,box-shadow .18s ease,background .18s ease !important; }
+    #mainForm input:hover, #mainForm select:hover, #mainForm textarea:hover { border-color:#b9cfde !important; }
+    #mainForm input::placeholder, #mainForm textarea::placeholder, #newTestInput::placeholder { color:#91a3b2 !important; }
+    #mainForm textarea { min-height:46px; resize:vertical; }
+    #stepForm > div:last-child > div { box-shadow:inset 0 1px 0 #fff; }
+    #previewBtn, #downloadBtn, #whatsappBtn { min-height:48px; letter-spacing:.025em; transition:transform .18s ease,box-shadow .18s ease,filter .18s ease !important; }
+    #previewBtn:hover, #downloadBtn:hover, #whatsappBtn:hover { transform:translateY(-1px); filter:brightness(1.04); }
+    #previewBtn:active, #downloadBtn:active, #whatsappBtn:active { transform:translateY(0); }
+    #previewBtn:disabled, #downloadBtn:disabled, #whatsappBtn:disabled { opacity:.65; cursor:wait; }
+    #statusMsg { background:#e8f7f1; color:#187454 !important; border:1px solid #ccebdd; border-radius:11px; padding:10px 12px; }
+    #reportCard { border-color:#dce7ee !important; box-shadow:0 18px 48px rgba(17,55,85,.13) !important; }
+    #reportCard .report-header { min-height:155px; }
+    #reportCard .report-test-card { break-inside:avoid; }
+    #configModal > div { box-shadow:0 28px 80px #0b254455 !important; }
+    #testListContainer > div { min-height:40px; }
+    footer { letter-spacing:.04em; }
+
+    @media (min-width: 641px) {
+      #stepForm, #stepPreview { padding:30px 34px !important; }
+    }
+    #stepForm > div:first-child, #stepPreview > div:first-child { border-color:#e4edf5 !important; padding-bottom:14px !important; }
+    #stepForm h2, #stepPreview h2 { color:#17628a !important; font-size:13px !important; letter-spacing:.11em !important; }
+    #mainForm { display:grid; grid-template-columns:1fr 1fr; gap:14px 18px; }
+    #mainForm > div { margin:0 !important; }
+    #mainForm > div:nth-child(1), #mainForm > div:nth-child(5), #mainForm > div:nth-child(6) { grid-column:1 / -1; }
+    #stepForm label { color:#49627b !important; font-size:12px !important; margin-bottom:6px !important; }
+    .input-3d { background:#f8fbfe !important; color:#163858 !important; border:1px solid #d7e3ed !important; border-radius:11px !important; box-shadow:none !important; padding-top:11px !important; padding-bottom:11px !important; }
+    .input-3d:focus { border-color:#1a9fbd !important; box-shadow:0 0 0 3px #19a9c21c !important; }
+    .prueba-row { background:#f7fafc !important; border:1px solid #e1eaf2 !important; border-radius:12px !important; padding:9px !important; }
+    #addPruebaBtn { background:#e8f7fa !important; border-color:#c2e9ee !important; color:#147a91 !important; border-radius:10px !important; padding:8px 12px !important; }
+    #totalPacientesBadge { background:transparent !important; color:#10385d !important; text-shadow:none !important; font-size:28px !important; }
+    #stepForm > div:last-child > div { background:#eaf5fb !important; border-color:#d4e9f3 !important; border-radius:14px !important; padding:13px 16px !important; }
+    #stepForm > div:last-child > div span:first-child { color:#38627f !important; }
+    #previewBtn, #downloadBtn { background:#126b91 !important; box-shadow:0 8px 18px #126b912b !important; border-radius:12px !important; }
+    #whatsappBtn { background:#19866d !important; border-radius:12px !important; }
+    #backBtn { color:#126b91 !important; background:#eaf5fb !important; border-color:#d5e8f1 !important; }
+    #configModal .card-3d { background:#fff !important; color:#163858 !important; border-color:#d8e5ef !important; }
+    #configModal h3 { color:#163858 !important; }
+    #configModal p, #configModal .text-slate-300 { color:#526a81 !important; }
+    #testListContainer { background:#f6f9fc !important; border-color:#dbe7f0 !important; }
+    #testListContainer span { color:#294762 !important; }
+    footer { color:#8194a7 !important; padding:20px !important; }
+    @media (max-width: 640px) {
+      body { padding:12px !important; }
+      body > div > header { margin-bottom:12px !important; padding:14px 15px !important; }
+      #stepForm, #stepPreview { padding:17px !important; }
+      #stepForm, #stepPreview { padding:17px !important; }
+      #mainForm { grid-template-columns:1fr; gap:12px; }
+      #mainForm > div { grid-column:1 / -1 !important; }
+      #mainForm > div:nth-child(3) { grid-column:1 / -1; }
+    }
+    body.app-page { display:block !important; max-width:none !important; min-height:100vh; padding:0 !important; margin:0; background:#eaf2fb !important; color:#123052 !important; overflow-x:hidden; }
+    #appSidebar { position:fixed; z-index:40; inset:0 auto 0 0; width:118px; display:flex; flex-direction:column; align-items:center; padding:20px 10px 18px; color:#d8e8f8; background:linear-gradient(180deg,#092d5b 0%,#08264f 100%); border-right:1px solid #ffffff16; box-shadow:7px 0 24px #11376712; }
+    .sidebar-brand { width:58px; height:58px; display:grid; place-items:center; border-radius:17px; background:linear-gradient(145deg,#22d0e2,#0787e3); color:white; font-size:20px; font-weight:950; letter-spacing:-1px; box-shadow:0 8px 20px #021b3a55; }
+    .sidebar-rule { width:54px; height:1px; background:#ffffff23; margin:18px 0 16px; }
+    .sidebar-nav { width:100%; display:flex; flex-direction:column; gap:8px; }
+    .sidebar-link { appearance:none; width:100%; min-height:78px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:7px; border:1px solid transparent; border-radius:15px; background:transparent; color:#c6d7eb; font-size:11px; font-weight:750; cursor:pointer; transition:background .18s ease,color .18s ease,transform .18s ease; }
+    .sidebar-link svg { width:23px; height:23px; fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }
+    .sidebar-link:hover { background:#ffffff13; color:#fff; transform:translateY(-1px); }
+    .sidebar-link.is-active { background:linear-gradient(145deg,#168be3,#0754c4); border-color:#70c5ff3d; color:#fff; box-shadow:0 9px 18px #021c4660; }
+    .sidebar-bottom { margin-top:auto; width:100%; padding-top:14px; display:flex; align-items:center; justify-content:center; gap:7px; color:#a8bfd9; font-size:8px; font-weight:850; letter-spacing:1px; }
+    .sidebar-dot { width:7px; height:7px; background:#1dc791; border-radius:50%; box-shadow:0 0 0 4px #1dc79120; }
+    #appShell { width:calc(100% - 118px); margin-left:118px; padding:0 0 28px; }
+    #appHeader { width:100% !important; max-width:none !important; min-height:134px; margin:0 !important; padding:21px clamp(22px,3vw,48px) !important; border:0 !important; border-radius:0 !important; box-shadow:0 8px 26px #092d5b24 !important; display:flex; justify-content:space-between; align-items:center; gap:24px; background:linear-gradient(110deg,#082d61 0%,#10549a 68%,#08769a 100%) !important; position:relative; overflow:hidden; }
+    #appHeader:after { content:""; position:absolute; inset:auto 0 0 0; height:3px; background:linear-gradient(90deg,#27d3df,#32b9ed 48%,transparent 85%); }
+    .header-brand { display:flex; align-items:center; gap:20px; min-width:0; }
+    .header-logo { width:88px; height:88px; flex:0 0 88px; display:grid; place-items:center; border-radius:23px; background:linear-gradient(145deg,#21d3e1,#067fe0); color:#fff; font-size:31px; font-weight:950; letter-spacing:-2px; box-shadow:0 10px 26px #021d4555; }
+    .header-kicker { margin:0 0 7px; color:#72dfeb !important; font-size:12px !important; line-height:1.2; font-weight:900 !important; letter-spacing:2px !important; }
+    #appHeader h1 { margin:0; color:#fff; font-size:clamp(22px,2.5vw,34px) !important; line-height:1.1; letter-spacing:.04em !important; font-weight:950; }
+    .header-subtitle { margin:6px 0 0; color:#d6eafb !important; font-size:14px !important; letter-spacing:.01em !important; }
+    .header-tools { display:flex; align-items:center; gap:20px; flex:0 0 auto; }
+    .header-date { display:flex; align-items:center; gap:12px; color:#fff; }
+    .header-date svg { width:34px; height:34px; fill:none; stroke:#74ddf0; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }
+    .header-date span { display:flex; flex-direction:column; gap:4px; }
+    .header-date small { color:#83d9eb; font-size:10px; font-weight:900; letter-spacing:1.6px; }
+    .header-date strong { color:#fff; font-size:14px; white-space:nowrap; }
+    .header-divider { width:1px; height:42px; background:#ffffff45; }
+    .header-status { display:flex; align-items:center; gap:9px; padding:10px 13px; border:1px solid #ffffff30; border-radius:999px; color:#d9f4ff; font-size:11px; white-space:nowrap; }
+    .header-status.is-offline { background:#fff4e7; border-color:#ffe0b3; color:#9a5b14; }
+    .header-status.is-offline span { background:#e79b32; box-shadow:0 0 0 4px #e79b3220; }
+    .online-badge.is-offline { background:#fff8ec; border-color:#f5dfb8; color:#98611c; }
+    .online-badge.is-offline span { background:#e79b32; box-shadow:0 0 0 4px #e79b3220; }
+    .header-status span,.online-badge span { width:8px; height:8px; background:#22c68e; border-radius:50%; box-shadow:0 0 0 4px #22c68e20; }
+    #stepForm, #stepPreview { max-width:1360px; width:calc(100% - 48px); margin:22px auto 0; padding:30px !important; border-radius:22px !important; box-shadow:0 12px 36px #1c4c7910 !important; }
+    .form-step-heading { display:flex; align-items:center; justify-content:space-between; gap:18px; border-bottom:1px solid #d8e8f4; padding:0 0 19px; margin-bottom:20px; }
+    .form-step-title { display:flex; align-items:center; gap:15px; }
+    .step-number { width:56px; height:56px; border-radius:50%; display:grid; place-items:center; background:linear-gradient(145deg,#23cce2,#087be0); color:#fff; font-size:24px; font-weight:900; box-shadow:0 8px 18px #1389d839; }
+    .form-step-title h2 { margin:0; color:#1256a1 !important; font-size:19px !important; letter-spacing:.02em !important; }
+    .form-step-title p { margin:4px 0 0; color:#5c7894; font-size:13px; }
+    .online-badge { display:flex; align-items:center; gap:9px; padding:10px 14px; border-radius:999px; border:1px solid #cdeedf; background:#f0fbf6; color:#19815f; font-size:11px; white-space:nowrap; }
+    #mainForm { grid-template-columns:repeat(3,minmax(0,1fr)); gap:20px 22px; }
+    #mainForm > div:nth-child(1), #mainForm > div:nth-child(4), #mainForm > div:nth-child(5), #mainForm > div:nth-child(6) { grid-column:1 / -1; }
+    #mainForm > div:nth-child(3) { display:contents; }
+    #mainForm > div { min-width:0; }
+    .form-field-label { display:flex !important; align-items:center; gap:9px; margin:0 0 8px !important; color:#173d66 !important; font-size:13px !important; line-height:1.25; font-weight:800 !important; }
+    .form-field-label svg { width:20px; height:20px; flex:0 0 20px; fill:none; stroke:#0875cd; stroke-width:2.2; stroke-linecap:round; stroke-linejoin:round; }
+    #stepForm input.input-3d, #stepForm select.input-3d, #stepForm textarea.input-3d { min-height:52px; padding-left:15px !important; border:1.5px solid #b8dcf7 !important; border-radius:12px !important; background:linear-gradient(180deg,#f8fcff,#f1f8fd) !important; color:#183d66 !important; font-size:15px !important; }
+    #stepForm textarea.input-3d { min-height:84px; padding-top:13px !important; }
+    #stepForm .prueba-row { min-height:66px; border:1.5px solid #c6e4fa !important; border-radius:13px !important; background:#f5faff !important; padding:8px !important; }
+    #stepForm .tipo-select { min-height:48px !important; }
+    #stepForm .cant-input { min-width:74px; min-height:48px !important; }
+    #addPruebaBtn { min-height:50px; padding:0 23px !important; border-radius:12px !important; background:linear-gradient(120deg,#0968df,#168ee8) !important; border:0 !important; color:#fff !important; font-size:14px !important; box-shadow:0 8px 17px #117dd52a; }
+    #stepForm > div:last-child { display:grid; grid-template-columns:minmax(210px,.72fr) minmax(300px,1.8fr); align-items:stretch; gap:15px; padding-top:18px; }
+    #stepForm > div:last-child > * { margin:0 !important; }
+    #stepForm > div:last-child > div { min-height:100px; }
+    .patient-total-panel { display:flex; align-items:center; gap:15px; padding:14px 17px; border:1px solid #d7edf9; border-radius:16px; background:linear-gradient(110deg,#e9f7ff,#f2faff); }
+    .patient-total-icon { width:62px; height:62px; flex:0 0 62px; display:grid; place-items:center; border-radius:50%; background:#d4efff; color:#0873d3; }
+    .patient-total-icon svg { width:36px; height:36px; fill:currentColor; }
+    .patient-total-copy { display:flex; flex-direction:column; gap:1px; }
+    .patient-total-copy span { color:#315e83; font-size:11px; font-weight:900; letter-spacing:.7px; }
+    .patient-total-copy strong { color:#103b73; font-size:37px; line-height:1; font-weight:950; }
+    #previewBtn { min-height:100px !important; border-radius:15px !important; background:linear-gradient(105deg,#075fd1,#078ee2) !important; box-shadow:0 10px 22px #086cd02f !important; font-size:16px !important; letter-spacing:.01em !important; }
+    #previewBtn:before { content:"↯"; margin-right:12px; font-size:25px; vertical-align:-2px; }
+    #appSidebar #openConfigBtn { background:transparent !important; border:1px solid transparent !important; box-shadow:none !important; color:#c6d7eb !important; padding:0 !important; }
+    #appSidebar #openConfigBtn:hover { background:#ffffff13 !important; color:#fff !important; }
+    #appSidebar #openConfigBtn.is-active { background:linear-gradient(145deg,#168be3,#0754c4) !important; border-color:#70c5ff3d !important; color:#fff !important; box-shadow:0 9px 18px #021c4660 !important; }
+    body > footer { margin-left:118px; padding:10px 20px 18px !important; }
+    @media (max-width: 900px) and (min-width: 641px) {
+      .header-tools { gap:8px; }
+      .header-status { display:none; }
+      .header-brand { gap:12px; }
+      .header-logo { width:62px; height:62px; flex-basis:62px; border-radius:18px; font-size:23px; }
+      .header-kicker { font-size:10px !important; letter-spacing:1.3px !important; }
+      #appHeader h1 { font-size:20px !important; }
+      .header-subtitle { font-size:11px !important; }
+      .header-date svg { width:27px; height:27px; }
+      .header-date strong { font-size:11px; }
+      #stepForm, #stepPreview { width:calc(100% - 32px); padding:24px !important; }
+      #mainForm { grid-template-columns:repeat(2,minmax(0,1fr)); }
+      #mainForm > div:nth-child(2) { grid-column:1 / -1; }
+    }
+    @media (max-width: 640px) {
+      body.app-page { padding:0 0 calc(76px + env(safe-area-inset-bottom)) !important; }
+      #appSidebar { inset:auto 0 0 0; width:100%; height:calc(72px + env(safe-area-inset-bottom)); flex-direction:row; justify-content:center; padding:6px 12px max(6px,env(safe-area-inset-bottom)); border-right:0; border-top:1px solid #ffffff26; box-shadow:0 -8px 25px #092d5b25; }
+      .sidebar-brand,.sidebar-rule,.sidebar-bottom { display:none; }
+      .sidebar-nav { width:100%; max-width:430px; flex-direction:row; justify-content:space-around; gap:8px; }
+      .sidebar-link { min-height:58px; max-width:112px; gap:2px; border-radius:12px; font-size:10px; }
+      .sidebar-link svg { width:21px; height:21px; }
+      #appShell { width:100%; margin:0; padding:0 0 8px; }
+      #appHeader { min-height:112px; padding:calc(14px + env(safe-area-inset-top)) 16px 14px !important; gap:10px; }
+      .header-brand { gap:11px; }
+      .header-logo { width:52px; height:52px; flex-basis:52px; border-radius:15px; font-size:19px; }
+      .header-kicker { font-size:8px !important; letter-spacing:1px !important; margin-bottom:4px; }
+      #appHeader h1 { font-size:16px !important; letter-spacing:.02em !important; }
+      .header-subtitle { font-size:10px !important; margin-top:4px; }
+      .header-tools { gap:8px; }
+      .header-date { gap:7px; }
+      .header-date svg { width:23px; height:23px; }
+      .header-date small { font-size:8px; }
+      .header-date strong { font-size:9px; white-space:normal; max-width:94px; }
+      .header-divider,.header-status { display:none; }
+      #stepForm, #stepPreview { width:calc(100% - 22px); margin-top:12px; padding:17px !important; border-radius:17px !important; }
+      .form-step-heading { align-items:flex-start; padding-bottom:14px; margin-bottom:16px; }
+      .form-step-title { gap:10px; }
+      .step-number { width:42px; height:42px; flex:0 0 42px; font-size:19px; }
+      .form-step-title h2 { font-size:15px !important; }
+      .form-step-title p { font-size:10px; line-height:1.4; }
+      .online-badge { padding:8px; font-size:0; }
+      .online-badge span { width:9px; height:9px; }
+      #mainForm { grid-template-columns:1fr 1fr; gap:13px 12px; }
+      #mainForm > div:nth-child(1), #mainForm > div:nth-child(2), #mainForm > div:nth-child(4), #mainForm > div:nth-child(5), #mainForm > div:nth-child(6) { grid-column:1 / -1 !important; }
+      #mainForm > div:nth-child(3) { display:contents; }
+      .form-field-label { font-size:11px !important; gap:6px; }
+      .form-field-label svg { width:17px; height:17px; flex-basis:17px; }
+      #stepForm input.input-3d, #stepForm select.input-3d, #stepForm textarea.input-3d { min-height:48px; padding-left:11px !important; font-size:16px !important; }
+      #stepForm .cant-input { min-width:57px; }
+      #stepForm > div:last-child { grid-template-columns:1fr; gap:10px; }
+      #stepForm > div:last-child > * { margin:0 !important; }
+      #stepForm > div:last-child > div { min-height:76px; }
+      .patient-total-panel { min-height:76px !important; padding:9px 13px !important; }
+      .patient-total-icon { width:48px; height:48px; flex-basis:48px; }
+      .patient-total-icon svg { width:29px; height:29px; }
+      .patient-total-copy span { font-size:10px; }
+      .patient-total-copy strong { font-size:30px; }
+      #previewBtn { min-height:60px !important; font-size:13px !important; }
+      body > footer { margin:0; padding-bottom:12px !important; }
+    }
+    @media (max-width: 400px) {
+      #appHeader { display:grid !important; grid-template-columns:minmax(0,1fr); align-items:start; gap:9px; }
+      .header-brand { min-width:0; }
+      .header-tools { width:100%; justify-content:flex-end; }
+      .header-date { margin-left:auto; }
+      .header-date strong { max-width:none; }
+    }
+    @media (max-width: 640px) and (orientation: landscape) {
+      #appSidebar { height:calc(64px + env(safe-area-inset-bottom)); }
+      .sidebar-link { min-height:50px; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { scroll-behavior:auto !important; animation-duration:.01ms !important; transition-duration:.01ms !important; }
+    }
+
+
+  </style>
+</head>
+<body class="app-page">
+  <aside id="appSidebar" aria-label="Navegación principal">
+    <div class="sidebar-brand" aria-label="Reporte Pro">RP</div>
+    <div class="sidebar-rule"></div>
+    <nav class="sidebar-nav">
+      <button type="button" class="sidebar-link is-active" id="navHome" aria-current="page">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1z"/></svg><span>Inicio</span>
+      </button>
+      <button type="button" class="sidebar-link" id="navTests">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 3h6M10 3v6l-5.5 9.2A2 2 0 0 0 6.2 21h11.6a2 2 0 0 0 1.7-2.8L14 9V3M8 15h8"/></svg><span>Pruebas</span>
+      </button>
+      <button type="button" class="sidebar-link" id="openConfigBtn">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 8.5a3.5 3.5 0 1 0 0 7 3.5 3.5 0 0 0 0-7Zm0-6 1.2 2.1 2.4.4 1.8-1.5 2.1 2.1L18 7.4l.4 2.4 2.1 1.2v2.9l-2.1 1.2-.4 2.4 1.5 1.8-2.1 2.1-1.8-1.5-2.4.4L12 22.4l-1.2-2.1-2.4-.4-1.8 1.5-2.1-2.1L6 17.5l-.4-2.4-2.1-1.2V11l2.1-1.2L6 7.4 4.5 5.6l2.1-2.1 1.8 1.5 2.4-.4z"/></svg><span>Ajustes</span>
+      </button>
+    </nav>
+    <div class="sidebar-bottom"><span class="sidebar-dot"></span><span>REPORTE PRO</span></div>
+  </aside>
+  <div id="appShell">
+    
+    <!-- Encabezado de marca -->
+    <header id="appHeader">
+      <div class="header-brand">
+        <div class="header-logo">RP</div>
+        <div>
+          <p class="header-kicker">REPORTE PRO · CONTROL DIARIO</p>
+          <h1>REPORTE DE JORNADA</h1>
+          <p class="header-subtitle">Resumen de pruebas y atenciones</p>
+        </div>
+      </div>
+      <div class="header-tools">
+        <div class="header-date">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 10h18M8 14h.01M12 14h.01M16 14h.01M8 17h.01M12 17h.01"/></svg>
+          <span><small>FECHA</small><strong id="headerDate">--</strong></span>
+        </div>
+        <span class="header-divider"></span>
+        <div class="header-status" id="networkStatus"><span></span><strong>En línea</strong></div>
+      </div>
+    </header>
+
+    <!-- PASO 1: FORMULARIO PRINCIPAL -->
+    <section id="stepForm" class="card-3d p-4 rounded-2xl space-y-3">
+      <div class="form-step-heading">
+        <div class="form-step-title">
+          <span class="step-number">1</span>
+          <div><h2>Datos de la jornada</h2><p>Complete la información de la jornada de atención</p></div>
+        </div>
+        <div class="online-badge" id="formNetworkStatus"><span></span><strong>Sistema en línea</strong></div>
+      </div>
+
+      <form class="space-y-2.5" id="mainForm">
+        <div>
+          <label class="form-field-label"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 21h18M5 21V7l7-4 7 4v14M9 9h.01M15 9h.01M9 13h.01M15 13h.01M10 21v-4h4v4"/></svg>Empresa / Cliente Atendido</label>
+          <input type="text" id="empresaInput" placeholder="Ej. GRUPO TOVA" 
+            class="w-full px-3 py-2 input-3d rounded-xl text-xs transition placeholder-slate-500" />
+        </div>
+
+        <div>
+          <label class="form-field-label"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 10h18M8 14h.01M12 14h.01M16 14h.01"/></svg>Fecha</label>
+          <input type="date" id="fechaInput" 
+            class="w-full px-3 py-2 input-3d rounded-xl text-xs transition" />
+        </div>
+
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="form-field-label"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>Hora Inicio</label>
+            <input type="time" id="horaInicioInput" 
+              class="w-full px-2.5 py-2 input-3d rounded-xl text-xs transition" />
+          </div>
+          <div>
+            <label class="form-field-label"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2M18 5l2-2"/></svg>Hora Fin</label>
+            <input type="time" id="horaFinInput" 
+              class="w-full px-2.5 py-2 input-3d rounded-xl text-xs transition" />
+          </div>
+        </div>
+
+        <div>
+          <label class="form-field-label"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-5 3-8 8-8s8 3 8 8"/></svg>Nombre del Responsable</label>
+          <input type="text" id="nombreInput" placeholder="Tu nombre" 
+            class="w-full px-3 py-2 input-3d rounded-xl text-xs transition placeholder-slate-500" />
+        </div>
+
+        <div class="space-y-2 pt-1" id="testsFieldset">
+          <div class="flex items-center justify-between">
+            <p class="text-[11px] font-bold uppercase tracking-wider text-slate-400">Pruebas / Ítems</p>
+            <button type="button" id="addPruebaBtn" class="text-[11px] bg-indigo-500/20 text-indigo-300 hover:bg-indigo-500/30 font-bold px-2.5 py-1 rounded-lg border border-indigo-500/30 transition shrink-0">
+              ➕ Añadir
+            </button>
+          </div>
+          
+          <div id="pruebasContainer" class="space-y-1.5"></div>
+        </div>
+
+        <div>
+          <label class="form-field-label"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h16v13H9l-5 4zM8 9h8M8 13h5"/></svg>Observaciones</label>
+          <textarea id="obsInput" rows="1" placeholder="Notas adicionales..." 
+            class="w-full px-3 py-2 input-3d rounded-xl text-xs transition placeholder-slate-500"></textarea>
+        </div>
+      </form>
+
+      <div class="pt-2 space-y-2.5">
+        <div class="patient-total-panel">
+          <div class="patient-total-icon"><svg viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="9" r="5"/><circle cx="6.5" cy="12" r="3.4"/><circle cx="25.5" cy="12" r="3.4"/><path d="M7 27c.4-6 3.6-9 9-9s8.6 3 9 9H7Z"/><path d="M1 26c.2-4.4 2.1-6.7 5.8-6.9 1.3 0 2.4.3 3.2.9-1.4 1.8-2.2 3.8-2.4 6H1Zm30 0h-6.6c-.2-2.2-1-4.2-2.4-6 .9-.6 1.9-.9 3.2-.9 3.7.2 5.6 2.5 5.8 6.9Z"/></svg></div>
+          <div class="patient-total-copy"><span>TOTAL DE PACIENTES</span><strong id="totalPacientesBadge">0</strong></div>
+        </div>
+
+        <button id="previewBtn" class="w-full bg-gradient-to-r from-indigo-500 via-violet-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white font-extrabold py-3 px-4 rounded-xl shadow-[0_10px_20px_-5px_rgba(99,102,241,0.5)] transition text-xs tracking-wide">
+          ✨ Crear reporte profesional
+        </button>
+      </div>
+    </section>
+
+    <!-- PASO 2: VISTA PREVIA Y REPORTE -->
+    <section id="stepPreview" class="card-3d p-4 rounded-2xl space-y-3 hidden">
+      <div class="flex items-center justify-between border-b border-white/10 pb-2">
+        <h2 class="text-xs font-black uppercase tracking-wider text-indigo-300 flex items-center gap-2">
+          <span class="w-5 h-5 rounded-lg bg-indigo-500/30 text-indigo-200 flex items-center justify-center text-[10px] font-bold border border-indigo-400/30">2</span> 
+          Previsualización HD
+        </h2>
+        <button id="backBtn" class="text-[11px] text-indigo-300 hover:text-white font-semibold bg-white/10 px-2.5 py-1 rounded-lg border border-white/10">
+          ✏️ Editar
+        </button>
+      </div>
+
+      <!-- Plantilla final del reporte -->
+      <div id="reportCard" style="width:100%;max-width:1000px;margin:0 auto;">
+        <img id="reportImagePreview" alt="Vista previa del reporte de jornada" style="display:block;width:100%;height:auto;border-radius:18px;" />
+        <div style="display:none" aria-hidden="true">
+          <span id="cardFecha"></span><span id="cardEmpresa"></span><span id="cardTurno"></span>
+          <span id="cardNombre"></span><div id="cardPruebasContainer"></div><span id="cardTotal"></span><span id="cardObs"></span>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 gap-2 pt-2">
+        <button id="downloadBtn" class="w-full bg-gradient-to-r from-indigo-500 to-violet-600 hover:from-indigo-600 hover:to-violet-700 text-white font-extrabold py-3 px-3 rounded-xl shadow-lg transition text-xs tracking-wide">
+          📥 Descargar Imagen HD
+        </button>
+        <button id="whatsappBtn" class="w-full bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-extrabold py-3 px-3 rounded-xl shadow-lg transition text-xs tracking-wide">
+          💬 Compartir reporte por WhatsApp
+        </button>
+      </div>
+
+      <p id="statusMsg" class="text-[11px] text-center font-bold text-emerald-400 hidden">
+        ¡Imagen guardada y texto copiado! Abriendo WhatsApp...
+      </p>
+    </section>
+
+  </div>
+
+  <!-- MODAL DE CONFIGURACIÓN -->
+  <div id="configModal" class="fixed inset-0 bg-black/70 backdrop-blur-md z-50 flex items-center justify-center p-3 hidden">
+    <div class="card-3d bg-slate-900 w-full max-w-xs rounded-2xl shadow-2xl overflow-hidden space-y-3 p-4 border border-white/20">
+      <div class="flex items-center justify-between border-b border-white/10 pb-2">
+        <h3 class="text-xs font-black text-white">⚙️ Gestionar Pruebas</h3>
+        <button id="closeConfigBtn" class="text-slate-400 hover:text-white text-xs font-bold p-1">✕</button>
+      </div>
+
+      <div class="space-y-2">
+        <p class="text-[11px] text-slate-300">Agrega o elimina exámenes personalizados.</p>
+        
+        <div class="flex gap-1.5">
+          <input type="text" id="newTestInput" placeholder="Nueva prueba..." 
+            class="w-full px-2.5 py-2 input-3d rounded-xl text-xs" />
+          <button type="button" id="addNewTestBtn" class="bg-indigo-600 hover:bg-indigo-500 text-white font-bold px-3 py-2 rounded-xl text-xs transition shrink-0 shadow">
+            ➕
+          </button>
+        </div>
+
+        <div class="border border-white/10 rounded-xl overflow-hidden max-h-40 overflow-y-auto divide-y divide-white/5 bg-slate-950/40" id="testListContainer"></div>
+      </div>
+
+      <div class="pt-1 flex justify-end">
+        <button id="saveConfigBtn" class="bg-indigo-600 hover:bg-indigo-500 text-white font-extrabold px-4 py-2 rounded-xl text-xs transition shadow">
+          Listo
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <footer class="text-center text-[10px] text-slate-500 py-2">
+    Reporte Pro &bull; Control claro de cada jornada
+  </footer>
+
+  <!-- SCRIPT DE LÓGICA -->
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const defaultTests = [
+        "Embarazo en Sangre (hCG)",
+        "Antidoping en Orina",
+        "Rutinas / Otros Exámenes",
+        "Glucosa Capilar",
+        "Perfil Lipídico"
+      ];
+
+      function getStoredTests() {
+        try {
+          const stored = localStorage.getItem('jornada_custom_tests_pro');
+          const parsed = stored ? JSON.parse(stored) : null;
+          return Array.isArray(parsed) && parsed.length ? parsed.filter(test => typeof test === 'string' && test.trim()) : [...defaultTests];
+        } catch (_) {
+          return [...defaultTests];
+        }
+      }
+
+      function saveStoredTests(tests) {
+        try { localStorage.setItem('jornada_custom_tests_pro', JSON.stringify(tests)); } catch (_) { /* App remains usable if storage is unavailable. */ }
+      }
+
+      const empresaInput = document.getElementById('empresaInput');
+      const fechaInput = document.getElementById('fechaInput');
+      const headerDate = document.getElementById('headerDate');
+      const networkStatus = document.getElementById('networkStatus');
+      const formNetworkStatus = document.getElementById('formNetworkStatus');
+      let offlineCacheReady = false;
+      function updateNetworkStatus() {
+        const online = navigator.onLine;
+        if (networkStatus) { networkStatus.classList.toggle('is-offline', !online); networkStatus.querySelector('strong').textContent = online ? 'En línea' : 'Sin conexión'; }
+        if (formNetworkStatus) {
+          formNetworkStatus.classList.toggle('is-offline', !online);
+          formNetworkStatus.querySelector('strong').textContent = online
+            ? (offlineCacheReady ? 'Lista para usar sin conexión' : 'Sistema en línea')
+            : (offlineCacheReady ? 'Modo sin conexión listo' : 'Sin conexión');
+        }
+      }
+      window.addEventListener('online', updateNetworkStatus);
+      window.addEventListener('offline', updateNetworkStatus);
+      updateNetworkStatus();
+      const horaInicioInput = document.getElementById('horaInicioInput');
+      const horaFinInput = document.getElementById('horaFinInput');
+      const nombreInput = document.getElementById('nombreInput');
+      const obsInput = document.getElementById('obsInput');
+      const DRAFT_STORAGE_KEY = 'jornada_report_draft_pro_v1';
+      function readDraft() {
+        try {
+          const value = localStorage.getItem(DRAFT_STORAGE_KEY);
+          return value ? JSON.parse(value) : null;
+        } catch (_) {
+          return null;
+        }
+      }
+
+      function saveDraft() {
+        try {
+          const draft = {
+            company: empresaInput.value,
+            date: fechaInput.value,
+            start: horaInicioInput.value,
+            end: horaFinInput.value,
+            responsible: nombreInput.value,
+            observations: obsInput.value,
+            tests: [...document.querySelectorAll('.prueba-row')].map(row => ({
+              type: row.querySelector('.tipo-select')?.value || '',
+              count: row.querySelector('.cant-input')?.value || ''
+            }))
+          };
+          localStorage.setItem(DRAFT_STORAGE_KEY, JSON.stringify(draft));
+        } catch (_) { /* The current session remains usable if storage is unavailable. */ }
+      }
+
+      const pruebasContainer = document.getElementById('pruebasContainer');
+      const addPruebaBtn = document.getElementById('addPruebaBtn');
+
+      const cardEmpresa = document.getElementById('cardEmpresa');
+      const cardFecha = document.getElementById('cardFecha');
+      const cardTurno = document.getElementById('cardTurno');
+      const cardNombre = document.getElementById('cardNombre');
+      const cardPruebasContainer = document.getElementById('cardPruebasContainer');
+      const cardTotal = document.getElementById('cardTotal');
+      const cardObs = document.getElementById('cardObs');
+      const totalPacientesBadge = document.getElementById('totalPacientesBadge');
+
+      const stepForm = document.getElementById('stepForm');
+      const stepPreview = document.getElementById('stepPreview');
+      const previewBtn = document.getElementById('previewBtn');
+      const backBtn = document.getElementById('backBtn');
+
+      const openConfigBtn = document.getElementById('openConfigBtn');
+      const closeConfigBtn = document.getElementById('closeConfigBtn');
+      const saveConfigBtn = document.getElementById('saveConfigBtn');
+      const configModal = document.getElementById('configModal');
+      const newTestInput = document.getElementById('newTestInput');
+      const addNewTestBtn = document.getElementById('addNewTestBtn');
+      const testListContainer = document.getElementById('testListContainer');
+
+      function localDateISO(date = new Date()) {
+        const local = new Date(date.getTime() - date.getTimezoneOffset() * 60000);
+        return local.toISOString().slice(0, 10);
+      }
+
+      const today = localDateISO();
+      fechaInput.value = today;
+      if (headerDate) headerDate.textContent = formatHeaderDate(today);
+      horaInicioInput.value = "07:00";
+      horaFinInput.value = "12:00";
+
+      function actualizarSelectsDropdowns() {
+        const tests = getStoredTests();
+        document.querySelectorAll('.tipo-select').forEach(select => {
+          const valorActual = select.value;
+          select.innerHTML = '';
+          tests.forEach(test => {
+            const opt = document.createElement('option');
+            opt.value = test;
+            opt.textContent = test;
+            if (test === valorActual) opt.selected = true;
+            select.appendChild(opt);
+          });
+        });
+      }
+
+      function renderTestListModal() {
+        const tests = getStoredTests();
+        testListContainer.innerHTML = '';
+        tests.forEach((test, index) => {
+          const div = document.createElement('div');
+          div.className = 'flex items-center justify-between p-2 text-xs bg-transparent hover:bg-white/5';
+          const label = document.createElement('span');
+          label.className = 'font-medium text-slate-300 truncate pr-2';
+          label.textContent = test;
+          const deleteButton = document.createElement('button');
+          deleteButton.type = 'button';
+          deleteButton.className = 'text-red-400 hover:text-red-300 transition delete-test-btn p-1 shrink-0';
+          deleteButton.textContent = '🗑️';
+          div.append(label, deleteButton);
+          div.querySelector('.delete-test-btn').addEventListener('click', () => {
+            let currentTests = getStoredTests();
+            if (currentTests.length > 1) {
+              currentTests.splice(index, 1);
+              saveStoredTests(currentTests);
+              renderTestListModal();
+              actualizarSelectsDropdowns();
+            } else {
+              alert('Debes mantener al menos una prueba.');
+            }
+          });
+          testListContainer.appendChild(div);
+        });
+      }
+
+      openConfigBtn.addEventListener('click', () => {
+        renderTestListModal();
+        configModal.classList.remove('hidden');
+        document.querySelectorAll('.sidebar-link').forEach(item => item.classList.remove('is-active'));
+        openConfigBtn.classList.add('is-active');
+      });
+      document.getElementById('navHome').addEventListener('click', () => {
+        if (!stepPreview.classList.contains('hidden')) backBtn.click();
+        document.getElementById('navHome').classList.add('is-active');
+        document.getElementById('navTests').classList.remove('is-active');
+        openConfigBtn.classList.remove('is-active');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      });
+      document.getElementById('navTests').addEventListener('click', () => {
+        if (!stepPreview.classList.contains('hidden')) backBtn.click();
+        document.getElementById('navTests').classList.add('is-active');
+        document.getElementById('navHome').classList.remove('is-active');
+        document.getElementById('testsFieldset').scrollIntoView({ behavior: 'smooth', block: 'center' });
+      });
+
+      function closeSettings() {
+        configModal.classList.add('hidden');
+        openConfigBtn.classList.remove('is-active');
+        document.getElementById('navHome').classList.add('is-active');
+      }
+      closeConfigBtn.addEventListener('click', closeSettings);
+      saveConfigBtn.addEventListener('click', closeSettings);
+
+      addNewTestBtn.addEventListener('click', () => {
+        const nuevoTexto = newTestInput.value.trim();
+        if (nuevoTexto) {
+          let tests = getStoredTests();
+          if (!tests.includes(nuevoTexto)) {
+            tests.push(nuevoTexto);
+            saveStoredTests(tests);
+            newTestInput.value = '';
+            renderTestListModal();
+            actualizarSelectsDropdowns();
+          } else {
+            alert('Esta prueba ya existe.');
+          }
+        }
+      });
+
+      function agregarFilaPrueba(tipoDefecto = '', cantDefecto = '') {
+        const tests = getStoredTests();
+        const row = document.createElement('div');
+        row.className = 'prueba-row flex gap-1.5 items-center bg-slate-900/40 p-2 rounded-xl border border-white/10';
+        
+        const select = document.createElement('select');
+        select.className = 'tipo-select w-full px-2.5 py-1.5 input-3d rounded-lg text-xs font-medium truncate';
+        tests.forEach(test => {
+          const option = document.createElement('option');
+          option.value = test;
+          option.textContent = test;
+          option.style.cssText = 'background: #0f172a; color: white;';
+          option.selected = test === tipoDefecto;
+          select.appendChild(option);
+        });
+        const quantity = document.createElement('input');
+        quantity.type = 'number'; quantity.min = '0'; quantity.placeholder = 'Cant';
+        quantity.value = cantDefecto;
+        quantity.className = 'cant-input w-14 px-1 py-1.5 input-3d rounded-lg text-center font-black text-indigo-300 text-xs shrink-0';
+        const remove = document.createElement('button');
+        remove.type = 'button';
+        remove.className = 'remove-row text-slate-400 hover:text-red-400 p-1 transition shrink-0';
+        remove.textContent = '🗑️';
+        row.append(select, quantity, remove);
+
+        row.querySelector('.remove-row').addEventListener('click', () => {
+          if (document.querySelectorAll('.prueba-row').length > 1) {
+            row.remove();
+            scheduleDraftSave();
+            actualizarSuma();
+          } else {
+            alert('Debes mantener al menos una prueba.');
+          }
+        });
+
+        row.querySelector('.cant-input').addEventListener('input', actualizarSuma);
+        pruebasContainer.appendChild(row);
+      }
+
+      function restoreDraft() {
+        const draft = readDraft();
+        if (!draft || typeof draft !== 'object') return;
+        if (typeof draft.company === 'string') empresaInput.value = draft.company;
+        if (typeof draft.date === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(draft.date)) fechaInput.value = draft.date;
+        if (typeof draft.start === 'string') horaInicioInput.value = draft.start;
+        if (typeof draft.end === 'string') horaFinInput.value = draft.end;
+        if (typeof draft.responsible === 'string') nombreInput.value = draft.responsible;
+        if (typeof draft.observations === 'string') obsInput.value = draft.observations;
+        if (headerDate) headerDate.textContent = formatHeaderDate(fechaInput.value);
+
+        const savedRows = Array.isArray(draft.tests) ? draft.tests.slice(0, 20) : [];
+        if (savedRows.length) {
+          pruebasContainer.innerHTML = '';
+          savedRows.forEach(item => {
+            if (!item || typeof item !== 'object') return;
+            const type = typeof item.type === 'string' ? item.type.slice(0, 120) : getStoredTests()[0];
+            const rawCount = String(item.count ?? '');
+            const count = /^\d{0,8}$/.test(rawCount) ? rawCount : '';
+            agregarFilaPrueba(type, count);
+          });
+          if (!pruebasContainer.children.length) agregarFilaPrueba(getStoredTests()[0], '');
+        }
+        actualizarSuma();
+      }
+      const initialTests = getStoredTests();
+      agregarFilaPrueba(initialTests[0], '');
+      restoreDraft();
+      const mainForm = document.getElementById('mainForm');
+      let draftSaveTimer = 0;
+      function scheduleDraftSave() {
+        window.clearTimeout(draftSaveTimer);
+        draftSaveTimer = window.setTimeout(saveDraft, 120);
+      }
+      mainForm.addEventListener('input', scheduleDraftSave);
+      mainForm.addEventListener('change', scheduleDraftSave);
+      window.addEventListener('pagehide', saveDraft);
+      document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'hidden') saveDraft();
+      });
+
+
+      addPruebaBtn.addEventListener('click', () => {
+        const tests = getStoredTests();
+        agregarFilaPrueba(tests[1] || tests[0], '');
+        scheduleDraftSave();
+      });
+
+      function calcularTotal() {
+        let total = 0;
+        document.querySelectorAll('.cant-input').forEach(input => {
+          total += parseInt(input.value) || 0;
+        });
+        return total;
+      }
+
+      function actualizarSuma() {
+        totalPacientesBadge.textContent = calcularTotal();
+      }
+
+      function formatearHora(horaStr) {
+        if (!horaStr) return '';
+        let [h, m] = horaStr.split(':');
+        let hour = parseInt(h);
+        let ampm = hour >= 12 ? 'PM' : 'AM';
+        hour = hour % 12;
+        hour = hour ? hour : 12;
+        return `${hour}:${m} ${ampm}`;
+      }
+
+      function formatReportDate(dateValue) {
+        if (!dateValue) return '--/--/----';
+        const [year, month, day] = dateValue.split('-').map(Number);
+        return new Intl.DateTimeFormat('es', { day: 'numeric', month: 'long', year: 'numeric' }).format(new Date(year, month - 1, day));
+      }
+
+      function formatHeaderDate(dateValue) { return formatReportDate(dateValue); }
+
+      function getSampleInfo(testName) {
+        const normalized = testName.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+        if (/orina|urocultivo|urin/.test(normalized)) return { label: 'Muestra de orina', icon: 'urine' };
+        if (/heces|copro|fecal|parasit/.test(normalized)) return { label: 'Muestra de heces', icon: 'stool' };
+        if (/sangre|hemat|hemogram|hcg|capilar|lipid/.test(normalized)) return { label: 'Muestra de sangre', icon: 'blood' };
+        return { label: 'Muestra no especificada', icon: 'generic' };
+      }
+
+      const sampleIconMarkup = {
+        blood: '<svg viewBox="0 0 48 48" width="40" height="40" aria-hidden="true"><rect x="16" y="5" width="16" height="8" rx="2.5" fill="#b74557"/><path d="M18 13h12l-1.5 5v17a6.5 6.5 0 0 1-13 0V18L14 13h4Z" fill="#fff" stroke="#8d3043" stroke-width="2.4" stroke-linejoin="round"/><path d="M16 28h13v7a6.5 6.5 0 0 1-13 0v-7Z" fill="#de5868"/><path d="M18 19h3M16 24h13" stroke="#8d3043" stroke-width="2" stroke-linecap="round"/><path d="M34 9c0 2-1.2 3.3-2.7 3.3S28.5 11 28.5 9c0-1.6 2.8-5 2.8-5S34 7.4 34 9Z" fill="#de5868"/></svg>',
+        urine: '<svg viewBox="0 0 48 48" width="40" height="40" aria-hidden="true"><rect x="12" y="6" width="24" height="7" rx="2" fill="#167ca7"/><path d="M15 14h18l-2.2 25H17.2L15 14Z" fill="#fff" stroke="#17668b" stroke-width="2.4" stroke-linejoin="round"/><path d="M17 27h14l-.9 9H17.9l-.9-9Z" fill="#f3c84b"/><path d="M18 18h12M19 23h10" stroke="#17668b" stroke-width="1.8" stroke-linecap="round"/><path d="M23 30c1.2-1.8 2-2.8 2-4.2a2 2 0 1 0-4 0c0 1.4.8 2.4 2 4.2Z" fill="#fff1a8"/></svg>',
+        stool: '<svg viewBox="0 0 48 48" width="40" height="40" aria-hidden="true"><rect x="11" y="7" width="26" height="7" rx="2" fill="#9a673d"/><path d="M14 15h20l-2 24H16l-2-24Z" fill="#fff" stroke="#80522f" stroke-width="2.4" stroke-linejoin="round"/><path d="M16 28h16l-.8 8H16.8l-.8-8Z" fill="#b98552"/><path d="M17 19h14M18 24h12" stroke="#80522f" stroke-width="1.8" stroke-linecap="round"/><circle cx="22" cy="31" r="1.2" fill="#8b5a35"/><circle cx="28" cy="34" r="1.2" fill="#8b5a35"/></svg>',
+        generic: '<svg viewBox="0 0 48 48" width="40" height="40" aria-hidden="true"><path d="M18 6h12M20 6v11L10 36a3.5 3.5 0 0 0 3 5h22a3.5 3.5 0 0 0 3-5L28 17V6" fill="#fff" stroke="#287d94" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/><path d="m14 31 20-.2 4 7H10l4-6.8Z" fill="#54b9c3"/><path d="M17 23h14" stroke="#287d94" stroke-width="2" stroke-linecap="round"/><circle cx="22" cy="34" r="1.3" fill="#eafcff"/><circle cx="28" cy="36" r="1.1" fill="#eafcff"/></svg>'
+      };
+
+      previewBtn.addEventListener('click', () => {
+        saveDraft();
+        const empresaVal = empresaInput.value.trim() || 'Sin especificar';
+        const fechaVal = fechaInput.value ? fechaInput.value.split('-').reverse().join('/') : '--/--/----';
+        
+        const hInicio = formatearHora(horaInicioInput.value);
+        const hFin = formatearHora(horaFinInput.value);
+        const turnoVal = (hInicio && hFin) ? `${hInicio} - ${hFin}` : 'Por definir';
+
+        const nombreVal = nombreInput.value.trim() || 'Por definir';
+        const obsVal = obsInput.value.trim() || 'Sin observaciones agregadas.';
+
+        cardEmpresa.textContent = empresaVal;
+        cardFecha.textContent = formatReportDate(fechaInput.value);
+        cardTurno.textContent = turnoVal;
+        cardNombre.textContent = nombreVal;
+        cardObs.textContent = obsVal;
+        cardTotal.textContent = calcularTotal();
+
+        cardPruebasContainer.innerHTML = '';
+        const reportEntries = [];
+        let rowsAdded = 0;
+        
+        document.querySelectorAll('.prueba-row').forEach((row) => {
+          const tipo = row.querySelector('.tipo-select').value;
+          const cant = parseInt(row.querySelector('.cant-input').value) || 0;
+
+          if (cant > 0) {
+            rowsAdded++;
+            reportEntries.push({ type: tipo, count: cant, sample: getSampleInfo(tipo) });
+            const palette = [
+              { bg: '#fff2f6', edge: '#e88aaa', chip: '#f6d8e3', ink: '#9e3157' },
+              { bg: '#eef8ff', edge: '#5aa8d5', chip: '#d8eefb', ink: '#17638e' },
+              { bg: '#f0f8f4', edge: '#68b58d', chip: '#d9efe3', ink: '#26724d' },
+              { bg: '#fff8ec', edge: '#dfaa58', chip: '#f6e8c8', ink: '#8b5b16' }
+            ][rowsAdded % 4];
+            const div = document.createElement('div');
+            div.className = 'report-test-card';
+            div.style.cssText = `min-height:140px;background:${palette.bg};border:1px solid ${palette.edge}55;border-top:4px solid ${palette.edge};border-radius:13px;padding:11px 13px;display:flex;flex-direction:column;justify-content:space-between;`;
+            const top = document.createElement('div');
+            top.style.cssText = 'display:flex;align-items:center;gap:9px;';
+            const sampleInfo = getSampleInfo(tipo);
+            const marker = document.createElement('span');
+            marker.style.cssText = `width:58px;height:58px;border-radius:17px;background:#fff;border:1px solid ${palette.edge}55;box-shadow:0 5px 12px ${palette.edge}22;display:flex;align-items:center;justify-content:center;flex:0 0 58px;overflow:hidden;`;
+            marker.setAttribute('role', 'img');
+            marker.setAttribute('aria-label', sampleInfo.label);
+            marker.title = sampleInfo.label;
+            marker.innerHTML = sampleIconMarkup[sampleInfo.icon];
+            const nameWrap = document.createElement('span');
+            nameWrap.style.cssText = 'display:flex;flex-direction:column;gap:3px;min-width:0;';
+            const name = document.createElement('span');
+            name.style.cssText = `font-size:12px;line-height:1.25;font-weight:900;color:${palette.ink};`;
+            name.textContent = tipo;
+            const sampleLabel = document.createElement('span');
+            sampleLabel.style.cssText = `font-size:8px;line-height:1.2;font-weight:800;letter-spacing:.7px;text-transform:uppercase;color:${palette.ink};opacity:.76;`;
+            sampleLabel.textContent = sampleInfo.label;
+            nameWrap.append(name, sampleLabel);
+            top.append(marker, nameWrap);
+            const value = document.createElement('div');
+            value.style.cssText = `font-size:34px;line-height:1;font-weight:900;color:${palette.ink};margin:8px 0 0 67px;`;
+            value.textContent = String(cant);
+            const unit = document.createElement('span');
+            unit.style.cssText = `font-size:9px;letter-spacing:1px;margin-left:7px;font-weight:800;color:${palette.ink};`;
+            unit.textContent = 'PACIENTES';
+            value.appendChild(unit);
+            div.append(top, value);
+            cardPruebasContainer.appendChild(div);
+          }
+        });
+
+        cardPruebasContainer.style.gridTemplateColumns = rowsAdded === 1 ? '1fr' : '1fr 1fr';
+        const reportData = { company: empresaVal, date: formatReportDate(fechaInput.value), schedule: turnoVal, name: nombreVal, observations: obsVal, total: calcularTotal(), entries: reportEntries };
+        reportSvgMarkup = ReportRenderer.buildSvg(reportData);
+        reportImagePreview.src = ReportRenderer.toDataUri(reportSvgMarkup);
+        reportImagePreview.alt = `Reporte de jornada de ${empresaVal}, ${reportData.date}, ${reportData.total} pacientes`;
+        if (rowsAdded === 0) {
+          cardPruebasContainer.innerHTML = `<div style="grid-column:1/-1;background:#f5f9fc;border:1px dashed #c7d8e5;color:#71879a;border-radius:12px;text-align:center;font-size:12px;padding:19px;">No se ingresaron cantidades en esta jornada.</div>`;
+        }
+
+        stepForm.classList.add('hidden');
+        stepPreview.classList.remove('hidden');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      });
+
+      backBtn.addEventListener('click', () => {
+        stepPreview.classList.add('hidden');
+        stepForm.classList.remove('hidden');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      });
+
+      async function renderReportPng() {
+        if (!reportSvgMarkup) throw new Error('Genera primero la vista previa del reporte.');
+        return ReportRenderer.toPngCanvas(reportSvgMarkup, 2);
+      }
+
+      function downloadCanvas(canvas) {
+        return new Promise((resolve, reject) => {
+          const link = document.createElement('a');
+          link.download = `Reporte_Jornada_Pro_${fechaInput.value || 'reporte'}.png`;
+          const clickDownload = href => {
+            link.href = href;
+            link.click();
+            if (href.startsWith('blob:')) window.setTimeout(() => URL.revokeObjectURL(href), 60000);
+            resolve();
+          };
+          if (typeof canvas.toBlob === 'function') {
+            canvas.toBlob(blob => blob ? clickDownload(URL.createObjectURL(blob)) : reject(new Error('No se pudo crear el PNG.')), 'image/png');
+          } else {
+            try { clickDownload(canvas.toDataURL('image/png')); } catch (error) { reject(error); }
+          }
+        });
+      }
+
+      function canvasToPngFile(canvas) {
+        return new Promise((resolve, reject) => canvas.toBlob(blob => {
+          if (!blob) return reject(new Error('No se pudo preparar el archivo PNG.'));
+          resolve(new File([blob], `Reporte_Jornada_Pro_${fechaInput.value || 'reporte'}.png`, { type: 'image/png' }));
+        }, 'image/png'));
+      }
+
+      function buildShareText() {
+        const fechaVal = fechaInput.value ? fechaInput.value.split('-').reverse().join('/') : '--/--/----';
+        const lines = [];
+        document.querySelectorAll('.prueba-row').forEach(row => {
+          const type = row.querySelector('.tipo-select')?.value || '';
+          const count = Math.max(0, parseInt(row.querySelector('.cant-input')?.value, 10) || 0);
+          if (count > 0) lines.push(`• ${type}: ${count}`);
+        });
+        return `⚡ *REPORTE DE JORNADA PRO* ⚡\n` +
+          `🏢 *Empresa:* ${cardEmpresa.textContent}\n📅 *Fecha:* ${fechaVal}\n` +
+          `⏰ *Horario:* ${cardTurno.textContent}\n👤 *Responsable:* ${cardNombre.textContent}\n\n` +
+          `🧪 *PRUEBAS REALIZADAS:*\n${lines.length ? lines.join('\n') : '• Ninguna especificada'}\n\n` +
+          `👥 *TOTAL PACIENTES:* ${cardTotal.textContent}\n📝 *Observaciones:* ${cardObs.textContent}`;
+      }
+
+      async function copyText(text) {
+        if (navigator.clipboard && window.isSecureContext) {
+          try { await navigator.clipboard.writeText(text); return true; } catch (_) { /* Use compatible fallback. */ }
+        }
+        const area = document.createElement('textarea');
+        area.value = text; area.setAttribute('readonly', '');
+        area.style.cssText = 'position:fixed;opacity:0;left:-9999px;top:0';
+        document.body.appendChild(area); area.select(); area.setSelectionRange(0, area.value.length);
+        let copied = false;
+        try { copied = document.execCommand('copy'); } catch (_) { copied = false; }
+        area.remove();
+        return copied;
+      }
+
+      const downloadBtn = document.getElementById('downloadBtn');
+      const whatsappBtn = document.getElementById('whatsappBtn');
+      const statusMsg = document.getElementById('statusMsg');
+      const reportImagePreview = document.getElementById('reportImagePreview');
+      let reportSvgMarkup = '';
+      
+      downloadBtn.addEventListener('click', async () => {
+        downloadBtn.disabled = true; statusMsg.textContent = 'Generando imagen Full HD…'; statusMsg.classList.remove('hidden');
+        try { await downloadCanvas(await renderReportPng()); statusMsg.textContent = 'Imagen HD descargada. Tus datos siguen disponibles para editar.'; }
+        catch (error) { statusMsg.textContent = error.message || 'No se pudo generar la imagen.'; }
+        finally { downloadBtn.disabled = false; }
+      });
+
+      whatsappBtn.addEventListener('click', async () => {
+        whatsappBtn.disabled = true; statusMsg.textContent = 'Preparando imagen y mensaje…'; statusMsg.classList.remove('hidden');
+        let text = buildShareText();
+        try {
+          const canvas = await renderReportPng();
+          const imageFile = await canvasToPngFile(canvas);
+          if (navigator.share && navigator.canShare && navigator.canShare({ files: [imageFile] })) {
+            await navigator.share({ files: [imageFile], title: 'Reporte de Jornada Pro', text });
+            statusMsg.textContent = 'Reporte compartido. Tus datos siguen disponibles.';
+            return;
+          }
+          await downloadCanvas(canvas);
+          text += '\n\n📎 Imagen del reporte descargada: adjúntala a este chat para enviarla junto al texto.';
+          const copied = await copyText(text);
+          statusMsg.textContent = copied ? 'Imagen descargada y texto copiado. Abre WhatsApp y adjunta el PNG descargado.' : 'Imagen descargada. Abre WhatsApp y adjunta el PNG; el texto se abrirá allí.';
+          window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank', 'noopener,noreferrer');
+        } catch (error) {
+          if (error.name === 'AbortError') statusMsg.textContent = 'Compartir cancelado. Tus datos siguen disponibles.';
+          else statusMsg.textContent = error.message || 'No se pudo preparar el reporte.';
+        } finally { whatsappBtn.disabled = false; }
+      });
+
+      if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {
+        window.addEventListener('load', async () => {
+          try {
+            await navigator.serviceWorker.register('./service-worker.js');
+            await navigator.serviceWorker.ready;
+            offlineCacheReady = true;
+            updateNetworkStatus();
+          } catch (_) { /* The online version remains usable if offline setup fails. */ }
+        });
+      }
+    });
+  </script>
+</body>
+</html>
